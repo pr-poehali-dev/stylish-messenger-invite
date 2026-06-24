@@ -253,6 +253,19 @@ export default function Index() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     setUser(data);
     setShowInvitePage(false);
+
+    // Автоматически добавить того, кто прислал приглашение
+    if (inviteNick && inviteNick.toLowerCase() !== nick.toLowerCase()) {
+      const current: Contact[] = (() => {
+        try { return JSON.parse(localStorage.getItem(CONTACTS_KEY) || '[]'); } catch { return []; }
+      })();
+      const alreadyExists = current.find(c => c.nick.toLowerCase() === inviteNick.toLowerCase());
+      if (!alreadyExists) {
+        const updated = [...current, { nick: inviteNick, addedAt: Date.now() }];
+        localStorage.setItem(CONTACTS_KEY, JSON.stringify(updated));
+        setContacts(updated);
+      }
+    }
   };
 
   const handleLogout = () => {
