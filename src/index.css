@@ -4,35 +4,38 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 30 8% 6%;
+    --foreground: 40 25% 92%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 30 9% 9%;
+    --card-foreground: 40 25% 92%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 30 9% 8%;
+    --popover-foreground: 40 25% 92%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 42 60% 55%;
+    --primary-foreground: 30 12% 8%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 30 8% 14%;
+    --secondary-foreground: 40 20% 88%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 30 7% 16%;
+    --muted-foreground: 40 8% 58%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 42 55% 52%;
+    --accent-foreground: 30 12% 8%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 62% 45%;
+    --destructive-foreground: 40 25% 92%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 38 14% 18%;
+    --input: 38 14% 16%;
+    --ring: 42 60% 55%;
 
-    --radius: 0.5rem;
+    --gold: 42 70% 60%;
+    --gold-soft: 40 45% 75%;
+
+    --radius: 0.85rem;
 
     --sidebar-background: 0 0% 98%;
 
@@ -96,6 +99,53 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+}
+
+@layer utilities {
+  .gold-text {
+    background: linear-gradient(
+      135deg,
+      hsl(40 60% 88%),
+      hsl(42 75% 58%),
+      hsl(38 55% 48%)
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .gold-border {
+    border: 1px solid transparent;
+    background:
+      linear-gradient(hsl(var(--card)), hsl(var(--card))) padding-box,
+      linear-gradient(135deg, hsl(42 70% 60% / 0.6), hsl(42 30% 30% / 0.2))
+        border-box;
+  }
+  .glass {
+    background: hsl(30 9% 9% / 0.7);
+    backdrop-filter: blur(20px);
+  }
+  .gold-glow {
+    box-shadow:
+      0 0 0 1px hsl(42 70% 60% / 0.25),
+      0 8px 40px hsl(42 70% 40% / 0.18);
+  }
+  .grain {
+    background-image: radial-gradient(
+      hsl(42 70% 60% / 0.04) 1px,
+      transparent 1px
+    );
+    background-size: 22px 22px;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: hsl(42 40% 40% / 0.4);
+    border-radius: 999px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
   }
 }
