@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1a1209"/>
+      <stop offset="100%" stop-color="#0e0c07"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f5d78a"/>
+      <stop offset="50%" stop-color="#c9922a"/>
+      <stop offset="100%" stop-color="#8a5f10"/>
+    </linearGradient>
+    <linearGradient id="gem1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef3c7"/>
+      <stop offset="100%" stop-color="#d4a017"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background rounded rect -->
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+
+  <!-- Subtle grain overlay effect via pattern -->
+  <rect width="512" height="512" rx="112" fill="#c9922a" opacity="0.04"/>
+
+  <!-- Gold ring border -->
+  <rect x="8" y="8" width="496" height="496" rx="106" fill="none" stroke="url(#gold)" stroke-width="3" opacity="0.5"/>
+
+  <!-- Diamond / Gem shape centered -->
+  <!-- Top facet -->
+  <polygon points="256,110 340,210 256,180 172,210" fill="url(#gem1)" opacity="0.95"/>
+  <!-- Left facet -->
+  <polygon points="256,180 172,210 200,330 256,310" fill="#c9922a" opacity="0.9"/>
+  <!-- Right facet -->
+  <polygon points="256,180 340,210 312,330 256,310" fill="#e8b84b" opacity="0.9"/>
+  <!-- Bottom left -->
+  <polygon points="200,330 256,310 256,400" fill="#a07015" opacity="0.9"/>
+  <!-- Bottom right -->
+  <polygon points="312,330 256,310 256,400" fill="#c9922a" opacity="0.85"/>
+  <!-- Bottom left outer -->
+  <polygon points="172,210 200,330 256,400" fill="#7a5010" opacity="0.7"/>
+  <!-- Bottom right outer -->
+  <polygon points="340,210 312,330 256,400" fill="#b8860b" opacity="0.7"/>
+
+  <!-- Highlight shine on top -->
+  <polygon points="256,110 295,175 256,158 217,175" fill="#fefce8" opacity="0.6"/>
+
+  <!-- "P" lettermark subtle -->
+  <text x="256" y="470" font-family="Georgia, serif" font-size="52" font-weight="700" fill="url(#gold)" text-anchor="middle" opacity="0.7" letter-spacing="8">PRIME</text>
+</svg>

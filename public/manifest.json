@@ -1,0 +1,67 @@
+{
+  "name": "Prime — Private Messenger",
+  "short_name": "Prime",
+  "description": "Элегантный приватный мессенджер с золотыми акцентами",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0e0c07",
+  "theme_color": "#c9922a",
+  "lang": "ru",
+  "categories": ["social", "communication"],
+  "icons": [
+    {
+      "src": "/icon-prime.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-prime.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshot-wide.png",
+      "sizes": "1280x800",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Prime мессенджер на десктопе"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Новый чат",
+      "short_name": "Чат",
+      "url": "/?action=new-chat",
+      "icons": [{ "src": "/icon-prime.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Пригласить",
+      "short_name": "Invite",
+      "url": "/?action=invite",
+      "icons": [{ "src": "/icon-prime.svg", "sizes": "any" }]
+    }
+  ]
+}

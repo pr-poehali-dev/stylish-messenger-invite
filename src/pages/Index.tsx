@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Icon from '@/components/ui/icon';
 
 type Section = 'chats' | 'media' | 'groups' | 'status' | 'calls';
@@ -108,6 +108,10 @@ function Login({ onEnter }: { onEnter: (phone: string, nick: string) => void }) 
           <Icon name="ShieldCheck" size={14} className="text-gold" />
           Сквозное шифрование · приватность гарантирована
         </p>
+        <p className="text-center text-xs text-muted-foreground/60 mt-3 flex items-center justify-center gap-1.5">
+          <Icon name="Smartphone" size={12} className="text-gold/50" />
+          Доступно как приложение для ПК и Android
+        </p>
       </div>
     </div>
   );
@@ -119,6 +123,23 @@ export default function Index() {
   const [section, setSection] = useState<Section>('chats');
   const [invite, setInvite] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [installPrompt, setInstallPrompt] = useState<Event & { prompt: () => void; userChoice: Promise<{ outcome: string }> } | null>(null);
+  const [installed, setInstalled] = useState(false);
+
+  useEffect(() => {
+    const handler = (e: Event) => { e.preventDefault(); setInstallPrompt(e as Event & { prompt: () => void; userChoice: Promise<{ outcome: string }> }); };
+    window.addEventListener('beforeinstallprompt', handler);
+    window.addEventListener('appinstalled', () => { setInstalled(true); setInstallPrompt(null); });
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  const installApp = async () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    const { outcome } = await installPrompt.userChoice;
+    if (outcome === 'accepted') setInstalled(true);
+    setInstallPrompt(null);
+  };
 
   const inviteLink = useMemo(
     () => (user ? `https://prime.chat/i/${user.nick.toLowerCase()}` : ''),
@@ -147,7 +168,23 @@ export default function Index() {
             <p className="text-[11px] text-muted-foreground tracking-[0.3em] uppercase">Private Messenger</p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
+          {installPrompt && !installed && (
+            <button
+              onClick={installApp}
+              className="flex items-center gap-2 rounded-full px-3 sm:px-4 py-2.5 bg-gold/10 border border-gold/30 hover:bg-gold/20 hover:scale-[1.03] transition-all"
+              title="Установить приложение"
+            >
+              <Icon name="Download" size={16} className="text-gold" />
+              <span className="text-sm font-medium hidden sm:inline text-gold">Установить</span>
+            </button>
+          )}
+          {installed && (
+            <span className="flex items-center gap-1.5 text-xs text-emerald-400 px-2">
+              <Icon name="CheckCircle" size={14} />
+              <span className="hidden sm:inline">Установлено</span>
+            </span>
+          )}
           <button
             onClick={() => setInvite(true)}
             className="group flex items-center gap-2 rounded-full px-4 sm:px-5 py-2.5 gold-border gold-glow hover:scale-[1.03] transition-transform"
