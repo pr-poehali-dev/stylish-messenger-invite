@@ -148,9 +148,10 @@ export default function Index() {
     setInstallPrompt(null);
   };
 
+  const baseUrl = window.location.origin;
   const inviteLink = useMemo(
-    () => (user ? `https://prime.chat/i/${user.nick.toLowerCase()}` : ''),
-    [user],
+    () => (user ? `${baseUrl}/i/${user.nick.toLowerCase()}` : ''),
+    [user, baseUrl],
   );
 
   const handleEnter = (phone: string, nick: string) => {
