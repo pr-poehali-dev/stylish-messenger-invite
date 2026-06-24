@@ -196,6 +196,9 @@ function InvitePage({ fromNick, onJoin }: { fromNick: string; onJoin: () => void
 
 // ───────────────────────── MESSENGER ─────────────────────────
 const STORAGE_KEY = 'prime_user';
+const CONTACTS_KEY = 'prime_contacts';
+
+type Contact = { nick: string; addedAt: number };
 
 export default function Index() {
   const inviteNick = new URLSearchParams(window.location.search).get('i');
@@ -207,6 +210,17 @@ export default function Index() {
       return saved ? JSON.parse(saved) : null;
     } catch { return null; }
   });
+  const [contacts, setContacts] = useState<Contact[]>(() => {
+    try {
+      const saved = localStorage.getItem(CONTACTS_KEY);
+      return saved ? JSON.parse(saved) : [];
+    } catch { return []; }
+  });
+  const [addModal, setAddModal] = useState(false);
+  const [addNick, setAddNick] = useState('');
+  const [addError, setAddError] = useState('');
+  const [activeContact, setActiveContact] = useState<Contact | null>(null);
+
   const [section, setSection] = useState<Section>('chats');
   const [invite, setInvite] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -244,6 +258,23 @@ export default function Index() {
   const handleLogout = () => {
     localStorage.removeItem(STORAGE_KEY);
     setUser(null);
+  };
+
+  const saveContacts = (list: Contact[]) => {
+    setContacts(list);
+    localStorage.setItem(CONTACTS_KEY, JSON.stringify(list));
+  };
+
+  const handleAddContact = () => {
+    const nick = addNick.trim().replace(/^@/, '');
+    if (!nick || nick.length < 2) { setAddError('Никнейм слишком короткий'); return; }
+    if (user && nick.toLowerCase() === user.nick.toLowerCase()) { setAddError('Это вы сами 😊'); return; }
+    if (contacts.find(c => c.nick.toLowerCase() === nick.toLowerCase())) { setAddError('Уже в контактах'); return; }
+    const updated = [...contacts, { nick, addedAt: Date.now() }];
+    saveContacts(updated);
+    setAddNick('');
+    setAddError('');
+    setAddModal(false);
   };
 
   if (showInvitePage && inviteNick && !user) {
@@ -327,15 +358,43 @@ export default function Index() {
         </nav>
 
         <aside className="w-full max-w-[340px] sm:w-[340px] border-r border-border/60 flex flex-col bg-card/20 min-h-0">
-          <div className="p-4 border-b border-border/40">
-            <div className="flex items-center gap-2 rounded-full bg-secondary/60 px-4 py-2.5">
+          <div className="p-3 border-b border-border/40 flex items-center gap-2">
+            <div className="flex items-center gap-2 rounded-full bg-secondary/60 px-4 py-2.5 flex-1">
               <Icon name="Search" size={16} className="text-muted-foreground" />
               <input placeholder="Поиск в Prime" className="bg-transparent text-sm w-full outline-none placeholder:text-muted-foreground" />
             </div>
+            {section === 'chats' && (
+              <button
+                onClick={() => { setAddModal(true); setAddNick(''); setAddError(''); }}
+                className="h-10 w-10 shrink-0 rounded-full grid place-items-center bg-gradient-to-br from-gold to-amber-700 text-background gold-glow hover:scale-105 transition-transform"
+                title="Добавить контакт"
+              >
+                <Icon name="UserPlus" size={18} />
+              </button>
+            )}
           </div>
 
           <div className="flex-1 overflow-y-auto scrollbar-thin flex flex-col">
-            {section === 'chats' && <EmptyState icon="MessageCircle" title="Нет чатов" text="Пригласите друзей по ссылке, чтобы начать первую переписку." />}
+            {section === 'chats' && (
+              contacts.length === 0
+                ? <EmptyState icon="UserPlus" title="Нет контактов" text="Добавьте человека по нику — нажмите + рядом с поиском." />
+                : <div className="py-1">
+                    {contacts.map((c, i) => (
+                      <button
+                        key={c.nick}
+                        onClick={() => setActiveContact(c)}
+                        className={`w-full flex items-center gap-3 px-4 py-3.5 text-left transition-colors animate-fade-in ${activeContact?.nick === c.nick ? 'bg-gold/10' : 'hover:bg-secondary/40'}`}
+                        style={{ animationDelay: `${i * 40}ms` }}
+                      >
+                        <Avatar>{c.nick.slice(0, 2).toUpperCase()}</Avatar>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium">@{c.nick}</p>
+                          <p className="text-sm text-muted-foreground truncate">Нажмите, чтобы написать</p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+            )}
             {section === 'media' && <EmptyState icon="Image" title="Нет медиа" text="Здесь появятся фото и видео из ваших переписок." />}
             {section === 'groups' && <EmptyState icon="Users" title="Нет групп" text="Создайте группу и добавьте участников по приглашению." />}
             {section === 'status' && (
@@ -356,21 +415,108 @@ export default function Index() {
 
         <main className="flex-1 hidden md:flex flex-col min-h-0 relative">
           <div className="absolute inset-0 bg-gradient-to-b from-amber-950/10 via-transparent to-background pointer-events-none" />
-          <div className="flex-1 grid place-items-center z-10">
-            <div className="text-center max-w-sm px-6 animate-fade-in">
-              <div className="h-20 w-20 rounded-2xl grid place-items-center mx-auto mb-6 gold-border gold-glow">
-                <Icon name="Gem" size={36} className="text-gold" />
+          {activeContact ? (
+            <>
+              <div className="glass border-b border-border/60 px-6 py-3.5 flex items-center gap-3 z-10">
+                <Avatar>{activeContact.nick.slice(0, 2).toUpperCase()}</Avatar>
+                <div className="flex-1">
+                  <p className="font-medium">@{activeContact.nick}</p>
+                  <p className="text-xs text-muted-foreground">контакт Prime</p>
+                </div>
+                <button className="h-10 w-10 grid place-items-center rounded-full hover:bg-secondary/60 transition-colors"><Icon name="Phone" size={18} className="text-gold" /></button>
+                <button className="h-10 w-10 grid place-items-center rounded-full hover:bg-secondary/60 transition-colors"><Icon name="Video" size={18} className="text-gold" /></button>
+                <button
+                  onClick={() => { saveContacts(contacts.filter(c => c.nick !== activeContact.nick)); setActiveContact(null); }}
+                  className="h-10 w-10 grid place-items-center rounded-full hover:bg-destructive/20 transition-colors"
+                  title="Удалить контакт"
+                ><Icon name="UserMinus" size={18} className="text-muted-foreground" /></button>
               </div>
-              <h2 className="font-display text-3xl gold-text mb-2">Добро пожаловать, @{user.nick}</h2>
-              <p className="text-muted-foreground mb-6">В Prime пока тихо. Пригласите близких по личной ссылке — и начните общение в роскоши.</p>
-              <button onClick={() => setInvite(true)} className="rounded-xl px-6 py-3 font-semibold bg-gradient-to-br from-gold to-amber-700 text-background gold-glow hover:scale-[1.03] transition-transform inline-flex items-center gap-2">
-                <Icon name="Link2" size={18} />
-                Пригласить друзей
+              <div className="flex-1 grid place-items-center z-10 px-6">
+                <div className="text-center animate-fade-in">
+                  <div className="h-16 w-16 rounded-full mx-auto mb-4 grid place-items-center bg-gradient-to-br from-gold to-amber-700 ring-1 ring-gold/30 text-background font-semibold text-xl">
+                    {activeContact.nick.slice(0, 2).toUpperCase()}
+                  </div>
+                  <p className="font-display text-2xl gold-text mb-1">@{activeContact.nick}</p>
+                  <p className="text-sm text-muted-foreground mb-6">Контакт добавлен в Prime</p>
+                  <p className="text-xs text-muted-foreground/60">Чат появится как только оба пользователя будут онлайн</p>
+                </div>
+              </div>
+              <div className="glass border-t border-border/60 p-4 flex items-center gap-3 z-10">
+                <button className="h-10 w-10 grid place-items-center rounded-full hover:bg-secondary/60 transition-colors"><Icon name="Paperclip" size={20} className="text-muted-foreground" /></button>
+                <div className="flex-1 flex items-center gap-2 rounded-full bg-secondary/60 px-4 py-3">
+                  <input placeholder="Сообщение..." className="bg-transparent w-full outline-none text-sm placeholder:text-muted-foreground" />
+                  <Icon name="Smile" size={20} className="text-muted-foreground" />
+                </div>
+                <button className="h-11 w-11 grid place-items-center rounded-full bg-gradient-to-br from-gold to-amber-700 text-background gold-glow hover:scale-105 transition-transform">
+                  <Icon name="Send" size={18} />
+                </button>
+              </div>
+            </>
+          ) : (
+            <div className="flex-1 grid place-items-center z-10">
+              <div className="text-center max-w-sm px-6 animate-fade-in">
+                <div className="h-20 w-20 rounded-2xl grid place-items-center mx-auto mb-6 gold-border gold-glow">
+                  <Icon name="Gem" size={36} className="text-gold" />
+                </div>
+                <h2 className="font-display text-3xl gold-text mb-2">Добро пожаловать, @{user.nick}</h2>
+                <p className="text-muted-foreground mb-6">Добавьте контакт по нику или пригласите друзей по личной ссылке.</p>
+                <div className="flex gap-3 justify-center">
+                  <button
+                    onClick={() => { setAddModal(true); setAddNick(''); setAddError(''); }}
+                    className="rounded-xl px-5 py-3 font-semibold bg-gradient-to-br from-gold to-amber-700 text-background gold-glow hover:scale-[1.03] transition-transform inline-flex items-center gap-2"
+                  >
+                    <Icon name="UserPlus" size={18} />
+                    Добавить контакт
+                  </button>
+                  <button onClick={() => setInvite(true)} className="rounded-xl px-5 py-3 font-semibold gold-border hover:bg-secondary/40 transition-colors inline-flex items-center gap-2">
+                    <Icon name="Link2" size={18} className="text-gold" />
+                    Пригласить
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </main>
+      </div>
+
+      {addModal && (
+        <div className="fixed inset-0 z-50 grid place-items-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in" onClick={() => setAddModal(false)}>
+          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-sm rounded-3xl bg-card gold-border gold-glow p-7 animate-scale-in relative overflow-hidden">
+            <div className="absolute -top-16 -right-16 h-40 w-40 rounded-full bg-gold/8 blur-3xl" />
+            <button onClick={() => setAddModal(false)} className="absolute top-5 right-5 text-muted-foreground hover:text-foreground"><Icon name="X" size={20} /></button>
+            <div className="relative">
+              <div className="h-14 w-14 rounded-2xl grid place-items-center mb-5 bg-gradient-to-br from-gold to-amber-700 gold-glow">
+                <Icon name="UserPlus" size={24} className="text-background" />
+              </div>
+              <h3 className="font-display text-2xl gold-text mb-1">Добавить контакт</h3>
+              <p className="text-sm text-muted-foreground mb-5">Введите никнейм пользователя Prime</p>
+
+              <div className={`flex items-center gap-2 rounded-xl bg-secondary/60 border px-4 py-3.5 mb-2 transition-colors ${addError ? 'border-destructive/60' : 'border-border/60 focus-within:border-gold/60'}`}>
+                <Icon name="AtSign" size={18} className="text-gold shrink-0" />
+                <input
+                  value={addNick}
+                  onChange={(e) => { setAddNick(e.target.value.replace(/\s/g, '')); setAddError(''); }}
+                  onKeyDown={(e) => e.key === 'Enter' && handleAddContact()}
+                  placeholder="username"
+                  autoFocus
+                  className="bg-transparent w-full outline-none text-sm"
+                />
+              </div>
+              {addError && <p className="text-xs text-destructive mb-3 ml-1">{addError}</p>}
+              {!addError && <div className="mb-4" />}
+
+              <button
+                onClick={handleAddContact}
+                disabled={addNick.trim().length < 2}
+                className="w-full rounded-xl py-3.5 font-semibold bg-gradient-to-br from-gold to-amber-700 text-background gold-glow transition-transform enabled:hover:scale-[1.02] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                <Icon name="UserPlus" size={18} />
+                Добавить
               </button>
             </div>
           </div>
-        </main>
-      </div>
+        </div>
+      )}
 
       {invite && (
         <div className="fixed inset-0 z-50 grid place-items-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in" onClick={() => setInvite(false)}>
