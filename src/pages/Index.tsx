@@ -118,8 +118,15 @@ function Login({ onEnter }: { onEnter: (phone: string, nick: string) => void }) 
 }
 
 // ───────────────────────── MESSENGER ─────────────────────────
+const STORAGE_KEY = 'prime_user';
+
 export default function Index() {
-  const [user, setUser] = useState<{ phone: string; nick: string } | null>(null);
+  const [user, setUser] = useState<{ phone: string; nick: string } | null>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      return saved ? JSON.parse(saved) : null;
+    } catch { return null; }
+  });
   const [section, setSection] = useState<Section>('chats');
   const [invite, setInvite] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -146,7 +153,18 @@ export default function Index() {
     [user],
   );
 
-  if (!user) return <Login onEnter={(phone, nick) => setUser({ phone, nick })} />;
+  const handleEnter = (phone: string, nick: string) => {
+    const data = { phone, nick };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    setUser(data);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem(STORAGE_KEY);
+    setUser(null);
+  };
+
+  if (!user) return <Login onEnter={handleEnter} />;
 
   const initials = user.nick.slice(0, 2).toUpperCase();
 
@@ -192,7 +210,16 @@ export default function Index() {
             <Icon name="Link2" size={16} className="text-gold" />
             <span className="text-sm font-medium hidden sm:inline">Пригласить</span>
           </button>
-          <Avatar>{initials}</Avatar>
+          <div className="relative group">
+            <Avatar>{initials}</Avatar>
+            <button
+              onClick={handleLogout}
+              className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full bg-secondary border border-border/60 grid place-items-center opacity-0 group-hover:opacity-100 transition-opacity"
+              title="Выйти из аккаунта"
+            >
+              <Icon name="LogOut" size={10} className="text-muted-foreground" />
+            </button>
+          </div>
         </div>
       </header>
 
